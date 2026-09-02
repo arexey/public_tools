@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Public Tools</title>
+	<style>
+		:root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+		body { max-width: 900px; margin: 0 auto; padding: 3rem 1.25rem; }
+		h1 { margin-bottom: .35rem; }
+		.muted { color: #6b7280; }
+		#tools { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 2rem; }
+		a { display: block; padding: 1.25rem; border: 1px solid #d1d5db; border-radius: .75rem; color: inherit; text-decoration: none; }
+		a:hover { border-color: #2563eb; box-shadow: 0 2px 10px #0002; }
+		.name { font-weight: 700; }
+		.arrow { float: right; color: #2563eb; }
+	</style>
+</head>
+<body>
+	<h1>Public Tools</h1>
+	<p class="muted">Browse the tools in this collection.</p>
+	<main id="tools" aria-live="polite"><p class="muted">Loading tools…</p></main>
+
+	<script>
+		const tools = document.getElementById('tools');
+		fetch('https://api.github.com/repos/arexey/public_tools/contents/docs')
+			.then(response => response.ok ? response.json() : Promise.reject())
+			.then(items => {
+				const folders = items.filter(item => item.type === 'dir');
+				tools.replaceChildren();
+				if (!folders.length) {
+					tools.innerHTML = '<p class="muted">No tools are available yet.</p>';
+					return;
+				}
+				folders.forEach(folder => {
+					const link = document.createElement('a');
+					link.href = encodeURIComponent(folder.name) + '/';
+					link.innerHTML = `<span class="name"></span><span class="arrow">→</span>`;
+					link.querySelector('.name').textContent = folder.name;
+					tools.append(link);
+				});
+			})
+			.catch(() => {
+				tools.innerHTML = '<p class="muted">Tools could not be loaded. Please try again later.</p>';
+			});
+	</script>
+</body>
+</html>
